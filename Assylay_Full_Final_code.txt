@@ -1,0 +1,800 @@
+/*
+Each hospital has nurses which cares about inpatients and assitst doctors
+*/
+CREATE TABLE Nurses --Creating table for Nurses
+(
+	nurse_id INT, --Each nurse will have specific ID number 
+	fn_name VARCHAR(32), --Of course first name
+	ln_name VARCHAR(32), --Then last name
+	IIN INT, -- Individual Identification Number of nurse
+	hire_date DATE, --When each nurse were hired
+	phone_number VARCHAR(64), --Contact number of nurse
+	PRIMARY KEY (nurse_id) --And primary key will be ID number of Nurse
+);
+
+/*
+What hospital would be a hospital without doctors? So, there is a table for doctors
+Also foreign key is nurse_id, and it shows which nurse assits doctor
+*/ 
+CREATE TABLE Doctor --Creating table for Doctors
+(
+	doctor_id INT, --Each doctor will have specific ID number
+	fd_name VARCHAR(30), --First name of doctor
+	ld_name VARCHAR(30), --Last name of doctor
+	b_day DATE, --Birthday of doctor
+	spec VARCHAR(64),
+	hire_date DATE, --Date when each doctor were hired 
+	phone_number VARCHAR(64), --Contact number of doctor
+	IIN INT, --Individual Identification Number of doctor
+	nurse_id INT, --Which nurse assists doctor
+	PRIMARY KEY (doctor_id), --Primary key will be ID num of doctor
+	FOREIGN KEY (nurse_id) REFERENCES Nurses(nurse_id) --And foreign key will be ID number of Nurse
+);
+
+/*
+Since the hospital is multidisciplinary, 
+it will have several blocks (2 according to the plan): 
+one of them will serve ordinary patients, 
+and the second block for wards where inpatients are kept
+*/
+CREATE TABLE Blocks --Creating table for blocks of multidisciplinary hospital
+(
+	block_id INT, --Each Block will have specific ID number
+	block_name VARCHAR(32), --Name of each block
+	floor INT, -- And how many floors in block
+	PRIMARY KEY (block_id) -- Primary key will be ID number of Block
+);
+
+/*
+There are some patients and inpatients who have health insurance. 
+And since health insurance can cover different amounts, 
+we decided to make a separate table for the types of insurance
+*/
+CREATE TABLE Type_of_insurance -- Creating table for insurance types of patients or inpatients
+(
+	ins_id INT, --Each type will have specific ID number
+	ins_name VARCHAR(32), --Name of insurance
+	ins_cost_tg INT, --And how much the insurance can cover
+	PRIMARY KEY (ins_id) --Primary key will be ID number of insurance
+);
+
+/*
+This table about patients, who will visit this hospital.
+If patient will have insurance, for this we have foregn key - "ins_id"
+which shows which type of insurance patient has
+*/
+CREATE TABLE Patient --Creating tabble for patients 
+(
+	patient_id INT, --Each patient will have specific ID number
+	fp_name VARCHAR(32), --First name of patient
+	lp_name VARCHAR(32), --Last name of patient
+	b_day DATE, --Birth date of patient
+	gender VARCHAR(10), --Gender of patient
+	mobile_number VARCHAR(64), --Contact number of patient
+	ins_id INT, --Which type of insurance each patient have
+	PRIMARY KEY (patient_id), --Primary key will be ID number of patient
+	FOREIGN KEY (ins_id) REFERENCES Type_of_insurance(ins_id) --And foreign key will be ID number of insurance type
+);
+
+
+
+Create table cabinet
+(
+	cabinet_id INT,
+	floor_num INT,
+	Primary key (cabinet_id)
+);
+/*
+Cabinets are one of important parts of hospital.
+Because patients are treated here.
+Each doctor has own cabinet, which situated in specific block 
+and where he can cure patients.
+*/
+CREATE TABLE Cabinet_visiting --Creating table for Cabinets
+(
+	cabinet_id INT, --Each cabinet will have specific ID number
+	attend_time VARCHAR(10), --In which time patient will visit cabinet
+	doctor_id INT, --Which doctor sits in the cabinet
+	patient_id INT, --Which patient cames in this cabinet
+	floor_num INT,
+	block_id INT,
+	PRIMARY KEY (cabinet_id, attend_time),
+	Foreign key (cabinet_id) References cabinet(cabinet_id),
+	FOREIGN KEY (doctor_id) REFERENCES Doctor(doctor_id), -- First foreign key will be ID number of Doctor
+	FOREIGN KEY (patient_id) REFERENCES Patient(patient_id), -- Second foreign key will be ID number of Patinet
+	FOREIGN KEY (block_id) REFERENCES Blocks(block_id) -- Third foreign key will be ID number of block
+);
+
+/*
+Every hospital can not heal patients without medical equipment.
+And each medical equipment placed in cabinets.
+*/
+CREATE TABLE Medical_equipment --Creating table for medical equipments
+(
+	medical_equipment_id INT, --Each medical equipment will have specific ID number 
+	med_equip_name VARCHAR(64), -- Name of medical equipment
+	cabinet_id INT, --In which cabinet this equipment placed
+	PRIMARY KEY(medical_equipment_id, cabinet_id), --Primary key will be ID number of med.equipment
+	FOREIGN KEY(cabinet_id) REFERENCES Cabinet(cabinet_id) -- Foreign key will be ID number of Cabinet
+);
+
+/*
+Wards are one of important parts of hospital too.
+Because inpatients are treated and lies here.
+Each ward situated in specific block and
+one nurse observes one ward
+*/
+CREATE TABLE Ward --Creating table for Wards
+(
+	ward_id INT, --Each Ward will have specific ID number
+	ward_name VARCHAR(32), --Name of Ward
+	block_id INT, --In which block ward located
+	nurse_id INT, --Which Nurse observes ward
+	PRIMARY KEY (ward_id), --Primary key will be ID number of Ward
+	FOREIGN KEY(block_id) REFERENCES Blocks(block_id), --First foreign key will be ID number of Block
+	FOREIGN KEY(nurse_id) REFERENCES Nurses(nurse_id) --Second foreign key will be ID number of Nurse
+);
+
+/*
+This table about inpatients, who will lay in this hospital.
+If inpatient will have insurance, for this we have foregn key - "ins_id"
+which shows which type of insurance patient has.
+Also we have foreign key - "ward_id", which shows in which ward
+inpatient lies.
+*/
+CREATE TABLE Inpatient --Creating table for Inpatients
+(
+	inpatient_id INT, --Each inpatient will have specific ID number
+	fi_name VARCHAR(32), --First name of inpatient
+	li_name VARCHAR(32), --Last name of inpatient 
+	b_day DATE, --Birth date of inpatient
+	gender VARCHAR (10), --Gender of inpatient
+	mobile_number VARCHAR(64), --Contact number of inpatient 
+	ins_id INT, --Which type of insurance inpatient has 
+	ward_id INT, --In which ward Inpatient lies
+	PRIMARY KEY (inpatient_id), --Primary key will ne ID number of Inpatient
+	FOREIGN KEY(ins_id) REFERENCES Type_of_insurance(ins_id), --First foreign key will be ID number of Insurance type
+	FOREIGN KEY(ward_id) REFERENCES Ward(ward_id) --Second foreign key will be ID number of Ward
+);
+
+/*
+Each patient and inpatient can not be patient or inpatient
+without diagnosis.
+*/
+CREATE TABLE Diagnosis --Creating table for Diagnosis
+(
+	diag_id INT, --Each diagnosis will have sprcific ID number 
+	diag_name VARCHAR(32), --Name of diagnosis
+	PRIMARY KEY (diag_id) --Primary key will be ID number of Diagnosis
+);
+
+/*
+Why we need hospitals? Of course to treat some illness.
+So this table shows treatment for ordinary patients of this 
+multidisciplinary hospital, with specific diagnosis. 
+*/
+CREATE TABLE Treatment_p --Creating table for Treatment of Patients
+(
+	patient_id INT, --Which patient will have treatment...
+	diag_id INT, --...for each diagnosis 
+	treat_name VARCHAR(32), --Name of treatment
+	treat_cost INT, --How much each treatment costs
+	PRIMARY KEY (patient_id, diag_id), --Composite primary key will be ID numbers of Patient and Diagnosis
+	FOREIGN KEY (patient_id) REFERENCES Patient(patient_id), --First foreign key will be ID number of Patient
+	FOREIGN KEY (diag_id) REFERENCES Diagnosis(diag_id) --Second foreign key will be ID number of Diagnosis
+);
+
+/*
+And this table is similar to previous,
+but only for inpatients.
+*/
+CREATE TABLE Treatment_in --Creating table for Treatment of Inpatients
+(
+	inpatient_id INT, --Which inpatient will have tratment...
+	diag_id INT, --...for each diagnosis
+	treat_name VARCHAR(32), --Name of treatment
+	treat_cost INT, --How much each treatment costs
+	PRIMARY KEY (inpatient_id, diag_id), --Composite primary key will be ID numbers of Inpatient and Diagnosis
+	FOREIGN KEY (inpatient_id) REFERENCES Inpatient(inpatient_id), --First foreign key will be ID number of Inpatient
+	FOREIGN KEY (diag_id) REFERENCES Diagnosis(diag_id) --Second foreign key will be ID number of Diagnosis
+);
+
+CREATE TABLE Treatment_hall
+(
+	treatment_hall_id INT,
+	treatment_hall_name VARCHAR(62),
+	inpatient_id INT,
+	PRIMARY KEY(treatment_hall_id,inpatient_id),
+	FOREIGN KEY (inpatient_id) REFERENCES Inpatient(inpatient_id)
+);
+
+--COMANDS
+
+ALTER TABLE Nurses ALTER COLUMN IIN SET DATA TYPE Decimal;
+
+ALTER TABLE Doctor ALTER COLUMN IIN SET DATA TYPE Decimal;
+
+ALTER TABLE Medical_equipment RENAME TO Hosptal_appliance;
+
+ALTER TABLE Cabinet_visiting ALTER COLUMN attend_time SET NOT NULL;
+
+ALTER TABLE ward DROP COLUMN ward_name;
+ALTER TABLE ward ADD COLUMN bed_num INT;
+
+ALTER TABLE Treatment_p ALTER COLUMN treat_name SET DATA TYPE VARCHAR(500);
+ALTER TABLE Treatment_in ALTER COLUMN treat_name SET DATA TYPE VARCHAR(500);
+ALTER TABLE Treatment_p RENAME COLUMN treat_name TO treat_description;
+ALTER TABLE Treatment_in RENAME COLUMN treat_name TO treat_description;
+
+
+INSERT INTO Nurses (nurse_id, fn_name, ln_name, IIN, hire_date, phone_number)
+VALUES (1, 'Willabella', 'Ickovitz', 801231467589, '8/8/2013', '+7-405-375-6701'),
+(2, 'Vladamir', 'Antley', 810612324589, '20/01/2013', '+7-367-441-3872'),
+(3, 'Wilone', 'Paddick', 830201451232, '26/11/2012', '+7-842-456-2990'),
+(4, 'Tiffy', 'Thewys', 890316455216, '06/07/2012', '+7-727-571-3572'),
+(5, 'Leroy', 'Vanlint', 900123457412, '26/10/2016', '+7-712-204-1259'),
+(6, 'Emelda', 'Boyson', 840526102302, '20/07/2016', '+7-983-733-8462'),
+(7, 'Melesa', 'Bergeon', 881005561023, '9/01/2018', '+7-683-220-5507'),
+(8, 'Jaime', 'Blackater', 860917360215, '9/10/2018', '+7-166-809-0842'),
+(9, 'Kalli', 'Leahy', 930606758412, '1/1/2015', '+7-928-837-3976'),
+(10, 'Isabella', 'McKennan', 930521811030, '28/9/2015', '+7-161-776-2780'),
+-----------------------------------------------------------------------------
+(11, 'Jeniffer', 'Bickersteth', 920304542192, '28/12/2017', '+7-735-704-2368'),
+(12, 'Brock', 'Rewcastle', 891014316450, '2/6/2019', '+7-150-838-8683'),
+(13, 'Jordan', 'Helsby', 891206920647, '31/10/2019', '+7-436-542-2316'),
+(14, 'Vannie', 'Maddison', 910208602784, '8/8/2018', '+7-520-128-4794'),
+(15, 'Ulick', 'Ackerley', 840702884877, '12/6/2019', '+7-361-869-8771'),
+(16, 'Ulric', 'Aleso', 860909688134, '5/5/2018', '+7-336-111-9764'),
+(17, 'Mireille', 'Goldsbury', 870529994162, '29/5/2018', '+7-373-182-7559'),
+(18, 'Omar', 'Muir', 961112530850, '28/6/2018', '+7-289-840-2387'),
+(19, 'Rochester', 'Saleway', 930425610871, '19/12/2016', '+7-440-121-7889');
+------------------------------------------------------------------------------
+
+
+
+INSERT INTO Doctor (doctor_id, fd_name, ld_name, b_day, spec, hire_date, phone_number, IIN, nurse_id)
+VALUES (10, 'Maddie', 'Prewett', '2/2/1976', 'therapist','27/11/2016', '+7-423-757-1929', 760202164589, 9),
+(11, 'Bernard', 'Annable', '5/7/1975', 'pediatrician','1/11/2012', '+7-699-361-4434', 750705102478, 4),
+(12, 'Elizabeth', 'Cahalin', '7/7/1977', 'cardiologist','15/8/2014', '+7-946-718-5658', 770707842651, 7),
+
+(14, 'Rufus', 'Patman', '15/2/1979', 'surgeon','5/12/2015', '+7-219-154-6300', 790215877114, 5),
+
+(16, 'Kyla', 'Arrington', '12/11/1970', 'traumatologist','3/9/2016', '+7-179-950-7488', 701112647109, 1),
+(17, 'Dell', 'Knock', '29/1/1972', 'neurologist','5/7/2016', '+7-826-858-0893', 720129644337, 10),
+(18, 'Hallsy', 'Howood', '10/8/1972', 'ophthalmologist','11/4/2013', '+7-509-187-0099', 720810942781, 8),
+(19, 'Rayna', 'Woolens', '6/8/1970', 'otolaryngologist','17/7/2012', '+7-109-358-3343', 700806587002, 3),
+----------------------------------------------------------------------------------
+(20, 'Vic', 'Dockreay', '15/11/1978', 'Endocrinologist', '30/7/2014', '+7-920-554-0680', 781115347584, 16),
+(21, 'Chelsea', 'Gelly', '26/1/1978', 'Vertebrologist', '20/4/2012', '+7-177-756-2621', 780126596580, 11),
+(22, 'Elbertine', 'Fiennes', '15/12/1974', 'Allergist', '30/1/2011', '+7-124-543-9803', 741215480305, 17),
+(23, 'Fayette', 'Marmyon', '24/4/1965', 'Gastroenterologist', '4/12/2010', '+7-678-871-3216', 650424993025, 12),
+(24, 'Opalina', 'Brandassi', '15/1/1977', 'Pulmonologist', '8/9/2010', '+7-817-928-8669', 770115110149, 14),
+(25, 'Nikolaos', 'Toothill', '19/6/1966', 'Rheumatologist', '3/11/2013', '+7-643-880-2426', 660619813491, 19),
+(26, 'Tommi', 'Stolz', '24/10/1976', 'Psychologist', '14/6/2010', '+7-541-953-4295', 761024936701, 18),
+(27, 'Maryann', 'Pont', '1/8/1980', 'Dermatologist', '6/10/2011', '+7-712-462-8654', 800801326598, 15),
+(28, 'Der', 'Wolvey', '24/9/1974', 'Dentist', '12/7/2014', '+7-778-596-3485', 740924502871, 14);
+------------------------------------------------------------------------------------
+
+
+INSERT INTO Blocks (block_id, block_name, floor)
+VALUES (1000, 'A-block', 3), (1001, 'B-block', 3); 
+
+INSERT INTO Type_of_insurance (ins_id, ins_name, ins_cost_tg)
+VALUES (9001, 'CSHI', 90000),
+(9002, 'VHI', 415000),
+(9003, 'MIFTA', 600000),
+(9004, 'PI', 1000000),
+(9005, 'Sport Insurance', 281000);
+
+INSERT INTO Patient (patient_id, fp_name, lp_name, b_day, gender, mobile_number, ins_id)
+VALUES (8001, 'Tamma', 'Bradneck', '26/6/1987', 'Female', '+7-431-721-0349', 9002),
+(8002, 'Sallee', 'Sier', '7/9/1953', 'Female', '+7-666-265-0159', 9003),
+(8003, 'Alyse', 'Suatt', '30/6/1989', 'Female', '+7-645-113-3586', 9005),
+(8004, 'Daphna', 'Kupisz', '6/3/1966', 'Female', '+7-630-164-5001', 9001),
+(8005, 'Elisha', 'Royl', '28/12/1969', 'Male', '+7-873-611-3073', 9001),
+(8006, 'Onfre', 'Gautrey', '21/12/1935', 'Male', '+7-283-360-9543', 9004),
+(8007, 'Elroy', 'Huikerby', '28/1/1972', 'Male', '+7-404-788-4620', 9001),
+(8008, 'Antonin', 'Rolls', '8/5/1958', 'Male', '+7-420-210-2964', 9003),
+(8009, 'Waylon', 'Pennicott', '17/2/1993', 'Male', '+7-244-695-7818', 9005),
+(8010, 'Netty', 'Bragg', '15/10/1984', 'Female', '+7-232-299-4087', 9005),
+(8011, 'Quintilla', 'Keely', '15/11/2006', 'Female', '+7-109-633-1430', 9004),
+(8012, 'Janet', 'Height', '17/2/2008', 'Female', '+7-166-868-2190', 9002),
+(8013, 'Godfry', 'Wingham', '13/7/2006', 'Male', '+7-577-607-1985', 9004),
+(8014, 'Sonny', 'Elves', '8/4/2014', 'Female', '+7-377-932-3989', 9003),
+(8015, 'Gweneth', 'Garvill', '27/6/2004', 'Female', '+7-408-400-2858', 9002),
+(8016, 'Cassius', 'Scowcraft', '15/2/2016', 'Male', '+7-535-585-5339', 9004),
+(8017, 'West', 'Blader', '6/2/1992', 'Male', '+7-208-276-4621', 9005),
+(8018, 'Zebadiah', 'Crewes', '13/10/2000', 'Male', '+7-718-682-0048', 9001),
+(8019, 'Dieter', 'Stairs', '17/9/2007', 'Male', '+7-116-281-1955', 9004),
+(8020, 'Jamima', 'Creber', '10/6/2001', 'Female', '+7-495-866-8640', 9005),
+(8021, 'Cindelyn', 'Doud', '20/12/2002', 'Female', '+7-526-940-6126', 9005),
+(8022, 'Baxie', 'Byway', '6/6/2010', 'Male', '+7-438-345-5113', 9003),
+(8023, 'Jodie', 'Gages', '9/9/2013', 'Male', '+7-223-908-8645', 9004),
+(8024, 'Lynnette', 'Tavner', '12/11/2011', 'Female', '+7-646-824-3723', 9003),
+(8025, 'Emmit', 'Baffin', '25/10/2003', 'Male', '+7-285-308-0829', 9004),
+(8026, 'Mehetabel', 'Esley', '29/11/2014', 'Female', '+7-983-827-8265', 9004),
+(8027, 'Jorge', 'Baseggio', '1/1/2004', 'Male', '+7-797-389-5698', 9003),
+(8028, 'Derby', 'Dewsnap', '18/5/2016', 'Male', '+7-183-656-8089', 9002),
+(8029, 'Roxine', 'Banane', '17/7/2019', 'Female', '+7-403-194-2191', 9002);
+
+
+Insert into Cabinet (cabinet_id, floor_num)
+Values (101, 1),
+(102, 1),
+(103, 1),
+(104, 1),
+(105, 1),
+(106, 1),
+(201, 2),
+(202, 2),
+(203, 2),
+(204, 2),
+(205, 2),
+(206, 2),
+(301, 3),
+(302, 3),
+(303, 3),
+(304, 3),
+(305, 3);
+
+INSERT INTO Cabinet_visiting (cabinet_id, attend_time, doctor_id, patient_id, floor_num, block_id)
+VALUES (101, '11:00', 10, 8001, 1, 1000),
+(101, '11:30', 10, 8029, 1, 1000),
+(102, '8:00', 11, 8011, 1, 1000),
+(102, '8:30', 11, 8012, 1, 1000),
+(102, '8:45', 11, 8013, 1, 1000),
+(102, '9:00', 11, 8014, 1, 1000),
+(102, '9:15', 11, 8015, 1, 1000),
+(102, '9:30', 11, 8016, 1, 1000),
+(102, '9:45', 11, 8019, 1, 1000),
+(102, '10:00', 11, 8022, 1, 1000),
+(102, '10:15', 11, 8023, 1, 1000),
+(102, '10:30', 11, 8024, 1, 1000),
+(102, '10:45' , 11, 8025, 1, 1000),
+(102, '11:00' , 11, 8026, 1, 1000),
+(102, '11:15' , 11, 8027, 1, 1000),
+(102, '11:30' , 11, 8028, 1, 1000),
+(103, '8:00' , 12, 8006, 1, 1000),
+(103, '8:30' , 12, 8018, 1, 1000),
+(103, '9:30' , 12, 8015, 1, 1000),
+(104, '8:00' , 20, 8008, 1, 1000),
+(104, '10:15' , 20, 8022, 1, 1000),
+(105, '8:00' , 21, 8002, 1, 1000),
+(106, '9:00' , 22, 8013, 1, 1000),
+(201, '8:00' , 14, 8009, 2, 1000),
+(201, '8:30' , 14, 8010, 2, 1000),
+(202, '8:00' , 16, 8010, 2, 1000),
+(202, '8:30' , 16, 8009, 2, 1000),
+(203, '11:30' , 17, 8027, 2, 1000),
+(204, '8:00' , 23, 8020, 2, 1000),
+(205, '9:45' , 24, 8016, 2, 1000),
+(206, '8:00' , 25, 8004, 2, 1000),
+(206, '11:45' , 25, 8028, 2, 1000),
+(301, '8:00' , 18, 8007, 3, 1000),
+(302, '8:00' , 19, 8003, 3, 1000),
+(302, '8:45' , 19, 8012, 3, 1000),
+(302, '9:00' , 19, 8017, 3, 1000),
+(302, '10:00' , 19, 8019, 3, 1000),
+(302, '11:15' , 19, 8026, 3, 1000),
+(303, '8:00' , 26, 8021, 3, 1000),
+(304, '10:45' , 27, 8024, 3, 1000),
+(305, '8:00' , 28, 8005, 3, 1000),
+(305, '8:30' , 28, 8011, 3, 1000),
+(305, '9:15' , 28, 8014, 3, 1000),
+(305, '11:00' , 28, 8025, 3, 1000);
+
+
+
+INSERT INTO Hosptal_appliance (medical_equipment_id, med_equip_name, cabinet_id)
+VALUES (1011001, 'Stadiometer', 101),
+(1011002, 'Bactericidal irradiator', 101),
+(1011003, 'Medical scales', 101),
+(1011004, 'Peak flow meter', 101),
+(1011005, 'Stethophonendoscope', 101),
+(1021101, 'fetal monitor', 102),
+(1021102, 'anti-decubitus system', 102),
+(1021103, 'oxygen line', 102),
+(1021104, 'vacuum aspirator', 102),
+(1021105, 'infusion pump', 102),
+(1031201, 'VEGETOTESTERS', 103),
+(1031202, 'ELECTROCARDIOGRAPHERS', 103),
+(1031203, 'SYSTEMS FOR CARDIOR REHABILITATION', 103),
+(1042001, 'Neurological diagnostic kit', 104),
+(1042002, 'Blood glucose meter', 104),
+(1042003, '24-hour glycemic monitoring system', 104),
+(1042004, 'Mini doppler', 104),
+(1052101, 'Equipment of the Medscreen system', 105),
+(1052102, 'Radiopaque substance', 105),
+(1062201, 'Spirograph', 106),
+(1062202, 'Peak flow meter', 106),
+(1062203, 'Allergen Test Production Equipment', 106),
+(1062204, 'Binocular microscope', 106),
+(2011401, 'small surgeons kit', 201),
+(2011402, 'transport bus', 201),
+(2011403, 'fixing splint', 201),
+(2011404, 'portable resuscitation kit', 201),
+(2011405, 'laser coagulation machine', 201),
+(2042301, 'phonendoscope', 204),
+(2042302, 'gastroduodenoscopes', 204),
+(2042303, 'colonoscopes', 204),
+(2042304, 'esophagoscopes', 204),
+(2052401, 'Spiroanalyzer', 205),
+(2052402, 'Phonendoscope', 205),
+(2052403, 'Medical suction drainage', 205),
+(2052404, 'Pleural puncture kit', 205),
+(2052405, 'Breathing inspiratory trainer', 205),
+(2062501, 'Blood pressure monitor', 206),
+(2062502, 'Stethophonendoscope', 206),
+(2062503, 'Tape measure', 206),
+(2021601, 'protractor', 202),
+(2021602, 'negatoscope', 202),
+(2021603, 'wire and transport tires', 202),
+(2031701, 'Neurologist tool kit', 203),
+(2031702, 'A set of odorous substances for olfactometry', 203),
+(2031703, 'Cognitive rehabilitation program', 203),
+(3011801, 'Sign projector', 301),
+(3011802, 'Automatic refkeratometer', 301),
+(3011803, 'Ophthalmoscope', 301),
+(3011804, 'Ophthalmic flashlight', 301),
+(3011805, 'Maklakovs ophthalmic tonometer', 301),
+(3011806, 'Ophthalmic test strips', 301),
+(3011807, 'Ophthalmic Surgery Instrument Set', 301),
+(3021901, 'ENT chair', 302),
+(3021902, 'Head light', 302),
+(3021903, 'Otoscope', 302),
+(3021904, 'Sigle funnel', 302),
+(3021905, 'High-frequency electrosurgical apparatus', 302),
+(3021906, 'Instruments for removing foreign bodies from ENT organs', 302),
+(3032601, 'childrens toys and board games', 303),
+(3032602, 'methodological materials for psychological part', 303),
+(3032603, 'complex of equipment', 303),
+(3032604, 'voice recorder', 303),
+(3042701, 'dermatoscope', 304),
+(3042702, 'portable cryo apparatus', 304),
+(3042703, 'irradiator', 304),
+(3042704, 'cryodestructor', 304),
+(3042705, 'bactericidal recirculator', 304),
+(3052801, 'luminaire for local lighting', 305),
+(3052802, 'drill with a set of handpieces', 305),
+(3052803, 'water and air supply systems', 305),
+(3052804, 'saliva aspirators and dust absorbers', 305),
+(3052805, 'ultrasonic scaler', 305),
+(3052806, 'spittoon', 305),
+(3052807, 'automatically controlled chair', 305);
+
+
+INSERT INTO Ward (ward_id, bed_num, block_id, nurse_id)
+VALUES (101, 3, 1001, 8),
+(102, 2, 1001, 2),
+(103, 4, 1001, 5),
+(201, 3, 1001, 3),
+(202, 2, 1001, 9),
+(203, 2, 1001, 1),
+(204, 4, 1001, 7),
+(301, 2, 1001, 10),
+(302, 3, 1001, 6),
+(303, 4, 1001, 4);
+
+INSERT INTO Inpatient (inpatient_id, fi_name, li_name, b_day, gender, mobile_number, ins_id, ward_id)
+VALUES (7001, 'Alexandrina', 'Curr', '13/8/1969', 'Female', '+7-352-404-2973', 9003, 101),
+(7002, 'Casandra', 'Gisby', '3/9/1958', 'Female', '+7-512-730-6960', 9004, 101),
+(7003, 'Revkah', 'Gullivan', '6/11/1953', 'Female', '+7-684-685-4307', 9001, 101),
+(7004, 'Rolando', 'Esgate', '25/11/1998', 'Male', '+7-235-505-9324', 9005, 102),
+(7005, 'Dannie', 'Pearson', '25/10/1931', 'Male', '+7-309-997-5998', 9002, 102),
+(7006, 'Everett', 'Solomonides', '17/7/1933', 'Male', '+7-218-416-9719', 9003, 103),
+(7007, 'Cello', 'Woolmore', '9/3/1988', 'Male', '+7-485-994-4615', 9001, 103),
+(7008, 'Hayyim', 'Maffini', '13/1/1961', 'Male', '+7-898-157-8516', 9003, 103),
+(7009, 'Smith', 'Chatel', '20/10/1959', 'Male', '+7-253-850-0803', 9001, 103),
+(7010, 'Kaiser', 'McConnel', '26/2/1997', 'Male', '+7-869-582-5358', 9001, 201),
+(7011, 'Mohandis', 'Tothe', '31/8/1989', 'Male', '+7-455-652-8551', 9002, 201),
+(7012, 'Gavan', 'Antosch', '16/6/1942', 'Male', '+7-287-406-9793', 9004, 201),
+(7013, 'Rea', 'Bolle', '13/6/1984', 'Female', '+7-117-289-9021', 9003, 202),
+(7014, 'Karil', 'McMakin', '23/3/1982', 'Female', '+7-666-576-1066', 9001, 202),
+(7015, 'Cyrus', 'Irvin', '18/9/1991', 'Male', '+7-233-532-4406', 9005, 203),
+(7016, 'Bibbye', 'Atyeo', '16/5/1993', 'Female', '+7-348-249-6005', 9001, 203),
+(7017, 'Corny', 'Grunbaum', '9/2/1934', 'Male', '+7-653-608-1791', 9004, 204),
+(7018, 'Moyra', 'Szimon', '5/7/1961', 'Female', '+7-542-461-7397', 9002, 204),
+(7019, 'Ansell', 'Pinney', '27/10/1934', 'Male', '+7-558-600-5639', 9004, 204),
+(7020, 'Phil', 'Graveston', '21/10/1982', 'Male', '+7-822-132-3043', 9001, 204),
+(7021, 'Ricki', 'Allewell', '22/8/1969', 'Female', '+7-187-878-5720', 9002, 301),
+(7022, 'Ashby', 'Arlt', '8/10/1995', 'Male', '+7-546-237-7509', 9003, 301),
+(7023, 'Roxine', 'Eilles', '9/8/1984', 'Female', '+7-494-910-0723', 9001, 302),
+(7024, 'Kalila', 'Mackiewicz', '27/3/1966', 'Female', '+7-303-797-4166', 9004, 302),
+(7025, 'Hillary', 'Larrett', '17/3/1961', 'Female', '+7-566-356-7049', 9003, 302),
+(7026, 'Brynne', 'Hartington', '16/1/1933', 'Female', '+7-351-646-3565', 9004, 303),
+(7027, 'Reynard', 'Ollcott', '6/10/1938', 'Male', '+7-597-584-2826', 9002, 303),
+(7028, 'Hamilton', 'Fullicks', '27/7/1964', 'Male', '+7-775-370-6054', 9002, 303),
+(7029, 'Nikaniki', 'Hoyte', '23/5/1946', 'Female', '+7-825-579-0740', 9003, 303);
+
+
+INSERT INTO Diagnosis (diag_id, diag_name)
+VALUES (1, 'Hypertension'),
+(2, 'Hyperlipidemia'),
+(3, 'Diabetes'),
+(4, 'Back pain'),
+(5, 'Obesity'),
+(6, 'Allergic rhinitis'),
+(7, 'Reflux esophagitis'),
+(8, 'Respiratory problems'),
+(9, 'Hypothyroidism'),
+(10, 'Visual refractive errors'),
+(11, 'Cataract'),
+(12, 'Conjunctivitis (Pinkeye)'),
+(13, 'Osteoarthritis'),
+(14, 'Fibromyalgia / myositis'),
+(15, 'Malaise and fatigue'),
+(16, 'Pain in joint'),
+(17, 'Acute laryngopharyngitis'),
+(18, 'Acute maxillary sinusitis'),
+(19, 'Acute bronchitis'),
+(20, 'Asthma'),
+(21, 'Depressive disorder'),
+(22, 'Nail fungus'),
+(23, 'Coronary atherosclerosis'),
+(24, 'Angina'),
+(25, 'Pharyngitis'),
+(26, 'Laryngitis'),
+(27, 'Menieres disease'),
+(28, 'Arrhythmia'),
+(29, 'Myocardial infarction'),
+(30, 'Open left arm fracture'),
+(31, 'Closed right leg fracture'),
+(32, 'Gingivitis'),
+(33, 'Periodontitis'),
+(34, 'Dental calculus'),
+(35, 'Caries');
+
+
+INSERT INTO Treatment_p(patient_id,diag_id,treat_description,treat_cost)
+VALUES(8001,20,'Berodual solution for inhalation 20 ml two times a day (1655tg)','3500'),
+(8002,4,'Take diclofenac(1380tg)  take three times a day,Diclofenac(490tg) gel smear twice a day for a month','4000'),
+(8003,26,'Augmentin(1560 tg) take one tablet 3 times a day,a hot compress on the area of the larynx','4000'),
+(8004,16,'Analgin(180tg) three times a day one tablet for 2 weeks,Voltaren(990tg) smear 2 times a day for a month','3000'),
+(8005,34,'Remove(9500tg) dental calculus','10000'),
+(8006,1,'Betak(2290tg) take 2 times a day for 1 month','4000'),
+(8007,12,'Okomistin(1430tg) drip every two hours on the left (sick) eye one drop. On the right eye in the morning and in the evening, one drop','3500'),
+(8008,3,'Oligym(2050tg) is accept 20-30 minutes before meals, one tablet 2 times a day','3200'),
+(8009,30,'Treatment of bone wounds','9500'),
+(8010,31,'Apply a temporary immobilizing bandage to the damaged area','9000'),
+(8011,32,'PeptoLine(4130tg) apply 8 to 10 drops to the skin of the inner surface of the forearm and RUB with light massaging movements until completely absorbed once a day. The period of use is 2-3 months','6000'),
+(8012,24,'Regular gargling with saline solution,furacilin(340tg) for mouthwash in the morning and evening','1500'),
+(8013,6,'Cetirizine(1140tg).Inside, regardless of food intake, without chewing and drinking enough liquid, preferably in the evening','4300'),
+(8014,35,'Remove the affected part of the tooth and restore its natural shape by filling','10000'),
+(8015,28,'Physiological procedures:swimming pool.Access useful vitamin complexe "Riboxin"(290tg).During treatment, a special diet is observed','2500'),
+(8016,19,'Arbidol(2850) take 100 mg for 2 weeks','3000'),
+(8017,27,'promethazine(1620tg) after meals 13 mg three times a day','4500'),
+(8018,2,'Atorvastatin 2 times a day for a month','2500'),
+(8019,25,'Hexalyse(1130tg).Without chewing, keep in the mouth until completely absorbed. The daily dose is 6-8 tablets, no more than 10 days','3000'),
+(8020,7,'Maalox is taken 1 sachet with suspension 1-2 hours after meals and at night','3500'),
+(8021,21,'Take mirtazapine 2 times a day for 2 weeks','7500'),
+(8022,5,'Correction of the diet and rational physical activity','7000'),
+(8023,8,'Azithrom(1925tg) is taken orally 1 time 1 hour before or 2 hours after a meal','3500'),
+(8024,22,'First wash your feet, then smear Climbazol(325tg) 2 times a day','1500'),
+(8025,33,'Tavegil(1290tg) 1 tablet in the morning and evening','2500'),
+(8026,18,'Take Ambroxol(690tg) three times a day after meals for a month','1250'),
+(8027,15,'Glycine(180tg) one tablet 2-3 times a day for two weeks','2000'),
+(8028,23,'Simvastatin(3616tg) 1 time a day, preferably in the evening','5000'),
+(8029,9,'Thyroid hormone replacement therapy','4500');
+
+
+
+
+INSERT INTO treatment_in (inpatient_id,diag_id,treat_description,treat_cost)
+VALUES(7001,11,'surgical treatment, during which the clouded lens is replaced with a transparent artificial one','480000'),
+(7002,4,'laser therapy','103000'),
+(7003,29,'give nitroglycerin','50000'),
+(7004,30,'surgery for fractures of the radius of the hand','400000'),
+(7005,9,'Thyroid hormone replacement therapy','15000'),
+(7006,35,'Remove the affected part of the tooth and restore its natural shape by filling','20000'),
+(7007,23,'Take simvastatin tablets every day 2 times ,atorvastatin before lunch once a day, rosuvastatin before bedtime','20000'),
+(7008,1,'Combination therapy','20000'),
+(7009,2,'take statins,nicotinic acid, gemfibrozil tablets','25000'),
+(7010,28,'Physiological procedures.This is a swimming pool, physical therapy, and certain training sessions','60000'),
+(7011,5,'Do daily morning exercises, swim.Diet-fractional, small portions with light snacks between main meals','25000'),
+(7012,18,'Operations for chronic sinusitis','183000'),
+(7013,32,'Remove of gingivitis','200000'),
+(7014,34,'Remove dental calculus','15000'),
+(7015,31,'ORIF : open reduction internal fixation','250000'),
+(7016,24,'Surgical removal of tonsils','103000'),
+(7017,10,'Refractive surgery aims to change the curvature of the cornea to focus light more precisely on the retina','16000'),
+(7018,17,'Endolaryngeal infusions','10000'),
+(7019,22,'Remove the affected tissue of the finger','30000'),
+(7020,20,'Combined preparation. These medications contain a long-acting bronchodilator and a glucocorticoid','90000'),
+(7021,14,'Medications, physiotherapy, massage','22000'),
+(7022,7,'Сomplex drug therapy','13000'),
+(7023,33,'Complete removal of the tooth root','16000'),
+(7024,25,'take a solution of chlorhexidine, essential oils, medicinal plants, calendula, eucalyptus and chamomile','14000'),
+(7025,16,'Joint immobilization with splint and acetaminophen','600000'),
+(7026,27,'take prochlorperazine and sedatives','350000'),
+(7027,13,'Laser irradiation','240000'),
+(7028,6,'Desensitization','530000'),
+(7029,26,'A hot compress on the area of the throat, gargling','30000');
+
+
+INSERT INTO  Treatment_hall(treatment_hall_id,treatment_hall_name,inpatient_id)
+VALUES(110,'swimming pool',7010),
+(111,'swimming pool',7011),
+(112,'massage',7021),
+(113,'physical therapy',7010),
+(114,'gym',7011),
+(115,'physical therapy',7021);
+
+
+
+---------------------------------------------
+
+----DML----DML----DML----DML----DML----DML-----
+
+UPDATE Blocks 
+SET floor = 4
+WHERE block_id = 1000
+
+UPDATE Blocks 
+SET floor = 4
+WHERE block_id = 1001;
+
+UPDATE Patient
+SET ins_id = 9002
+WHERE patient_id = 8021;
+
+DELETE FROM Treatment_hall
+WHERE treatment_hall_name = 'massage';
+
+UPDATE Treatment_hall
+SET treatment_hall_id=112
+WHERE treatment_hall_id=115;
+
+UPDATE Ward
+SET bed_num=3
+WHERE ward_id=102 OR ward_id=202 OR ward_id=203;
+
+UPDATE Inpatient
+SET ward_id=102
+WHERE inpatient_id=7018;
+
+UPDATE Treatment_in
+SET treat_description='Desensitization,allergrodil and emodin'
+WHERE inpatient_id=7028;
+
+UPDATE nurses
+SET phone_number  = '+7-912-848-72-61'
+WHERE nurse_id = 18
+
+DELETE FROM hosptal_appliance
+WHERE medical_equipment_id = 3011805;
+
+UPDATE hosptal_appliance
+SET med_equip_name = 'protractor NVU2015'
+WHERE medical_equipment_id = 2021601;
+
+UPDATE Cabinet
+SET floor_num = 4
+WHERE cabinet_id = 106;
+
+UPDATE Doctor
+SET phone_number='+7-708-582-0365'
+WHERE doctor_id=14;
+
+UPDATE Diagnosis
+SET diag_name='Diabet II-type'
+WHERE diag_id=3;
+
+UPDATE Type_of_insurance
+SET ins_cost_tg='100000'
+WHERE ins_id=9001;
+
+UPDATE Treatment_p
+SET treat_cost='1500'
+WHERE patient_id=8027;
+---------------------------------------------
+
+----JOIN----MAX----MIN----ETC----------
+
+SELECT diagnosis.diag_name,inpatient.fi_name,patient.fp_name
+FROM Diagnosis
+FULL OUTER JOIN treatment_in
+ON treatment_in.diag_id = diagnosis.diag_id
+LEFT JOIN inpatient
+ON inpatient.inpatient_id = treatment_in.inpatient_id
+FULL OUTER JOIN treatment_p
+ON treatment_p.diag_id = diagnosis.diag_id
+LEFT JOIN patient
+ON patient.patient_id = treatment_p.patient_id;
+
+
+SELECT nurses.nurse_id, nurses.fn_name, nurses.ln_name, inpatient.fi_name, inpatient.li_name
+FROM nurses
+FULL OUTER JOIN ward
+ON nurses.nurse_id = ward.nurse_id
+INNER JOIN inpatient
+ON ward.ward_id = inpatient.ward_id
+ORDER BY nurse_id
+
+SELECT MAX(treat_cost),MIN(treat_cost),SUM(treat_cost),round(AVG(treat_cost),3) 
+FROM treatment_p;
+
+SELECT MAX(treat_cost),MIN(treat_cost),SUM(treat_cost),round(AVG(treat_cost),3) 
+FROM treatment_in;
+
+SELECT fd_name, ld_name,hire_date 
+FROM Doctor
+WHERE hire_date 
+BETWEEN ('31.12.2013') AND ('01.01.2019')
+
+
+SELECT ins_id, count(*)
+FROM patient 
+GROUP BY ins_id 
+ORDER BY ins_id;
+
+SELECT ins_id, count(*)
+FROM inpatient 
+GROUP BY ins_id 
+ORDER BY ins_id;
+
+SELECT * FROM Treatment_hall
+WHERE treatment_hall_name IN ('swimming pool');
+
+
+SELECT (Type_of_insurance.ins_cost_tg - treatment_in.treat_cost) as Reminder_of_ins, inpatient.inpatient_id, inpatient.fi_name
+FROM treatment_in
+FULL OUTER JOIN inpatient
+ON inpatient.inpatient_id = treatment_in.inpatient_id 
+FULL OUTER JOIN Type_of_insurance
+ON inpatient.ins_id = Type_of_insurance.ins_id 
+
+SELECT (Type_of_insurance.ins_cost_tg - treatment_p.treat_cost) as Reminder_of_ins, patient.patient_id, patient.fp_name
+FROM treatment_p
+FULL OUTER JOIN patient
+ON patient.patient_id = treatment_p.patient_id 
+FULL OUTER JOIN Type_of_insurance
+ON patient.ins_id = Type_of_insurance.ins_id 
+
+---------------------------------------------
+
+--------SUBQUERIES-------------
+
+SELECT cabinet_visiting.cabinet_id, cabinet_visiting.doctor_id
+FROM cabinet_visiting
+WHERE floor_num = (SELECT cabinet_visiting.floor_num
+				  FROM cabinet_visiting
+				  WHERE doctor_id = 14
+				  Group by floor_num)
+GROUP BY cabinet_id, doctor_id;
+
+
+SELECT patient_id, MIN (treat_cost)
+FROM treatment_p 
+GROUP BY patient_id
+HAVING MIN (treat_cost) < (SELECT AVG (treat_cost)
+						   FROM treatment_p) 
+order by MIN (treat_cost);
+						   
+						   
+SELECT fp_name, lp_name, ins_id
+FROM patient
+WHERE ins_id IN (
+        SELECT ins_id
+        FROM Type_of_insurance
+        WHERE ins_name = 'CSHI'
+    );
+	
+SELECT fp_name, lp_name, age(b_day)
+FROM Patient
+WHERE extract(year from age(current_date, b_day)) < ANY
+				(
+					SELECT extract(year from age(current_date, b_day))
+					FROM Patient
+					WHERE extract(year from age(current_date, b_day)) < 18
+				);
+
+
+SELECT ward_id,COUNT(inpatient_id)
+FROM inpatient
+GROUP BY ward_id
+HAVING COUNT (inpatient_id)= ANY(
+SELECT COUNT(inpatient_id)
+FROM ward
+)
+ORDER BY ward_id;
+---------------------------------------------
